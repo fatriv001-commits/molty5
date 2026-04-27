@@ -3,6 +3,8 @@ State router — determines agent state from GET /accounts/me response.
 Routes per skill.md State Router logic.
 """
 from bot.utils.logger import get_logger
+# --- TAMBAHAN IMPORT AGENT ---
+from bot.aggressive_logic import AggressiveAgent 
 
 log = get_logger(__name__)
 
@@ -28,6 +30,14 @@ def determine_state(me_response: dict) -> tuple[str, dict]:
         if game.get("gameStatus") in ("waiting", "running"):
             log.info("Active game found: %s (status=%s)",
                      game["gameId"], game["gameStatus"])
+            
+            # --- TAMBAHAN LOGIKA AKSI AGENT ---
+            # Menjalankan AI Agent jika pertandingan sedang berlangsung
+            if game.get("gameStatus") == "running":
+                agent = AggressiveAgent(game)
+                agent.run_logic(game)
+            # ----------------------------------
+
             return IN_GAME, {
                 "game_id": game["gameId"],
                 "agent_id": game["agentId"],
